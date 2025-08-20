@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -28,7 +29,29 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        // Get redirect path from either form input or URL parameter
+        $redirectPath = $request->input('redirect_path') ?? $request->query('redirect_to');
+
+        // Handle specific redirect paths
+        if ($redirectPath) {
+            if ($redirectPath === 'marketing.dashboard' && ($user->role === 'marketing' || $user->role === 'user')) {
+                return redirect()->route('marketing.dashboard');
+            } elseif ($redirectPath === 'admin.dashboard' && $user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+        }
+
+        // If no redirect_path or invalid role, check user role
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'marketing' || $user->role === 'user') {
+            return redirect()->route('marketing.dashboard');
+        }
+
+        // If user has no specific role, redirect to welcome page
+        return redirect()->route('welcome');
     }
 
     /**
