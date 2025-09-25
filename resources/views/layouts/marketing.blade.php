@@ -73,9 +73,9 @@
                                 <a href="{{ route('marketing.membership.list') }}" class="block py-2 px-3 text-sm text-[#2cacad] hover:bg-[#2cacad]/10 rounded-md transition {{ request()->routeIs('marketing.membership.list') ? 'bg-[#2cacad]/10 font-medium' : '' }}">
                                     Member List
                                 </a>
-                                <a href="{{ route('marketing.membership.unverified') }}" class="block py-2 px-3 text-sm text-[#2cacad] hover:bg-[#2cacad]/10 rounded-md transition {{ request()->routeIs('marketing.membership.unverified') ? 'bg-[#2cacad]/10 font-medium' : '' }}">
+                                {{-- <a href="{{ route('marketing.membership.unverified') }}" class="block py-2 px-3 text-sm text-[#2cacad] hover:bg-[#2cacad]/10 rounded-md transition {{ request()->routeIs('marketing.membership.unverified') ? 'bg-[#2cacad]/10 font-medium' : '' }}">
                                     Unverified Members
-                                </a>
+                                </a> --}}
                                 <a href="{{ route('marketing.membership.pending') }}" class="block py-2 px-3 text-sm text-[#2cacad] hover:bg-[#2cacad]/10 rounded-md transition {{ request()->routeIs('marketing.membership.pending') ? 'bg-[#2cacad]/10 font-medium' : '' }}">
                                     Pending Members
                                 </a>

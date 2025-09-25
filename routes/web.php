@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/pending-members', [MembershipController::class, 'pendingList'])->name('pending');
             Route::put('/pending-members/{id}/verify', [MembershipController::class, 'verifyPending'])->name('pending.verify');
             Route::put('/pending-members/{id}/reject', [MembershipController::class, 'rejectPending'])->name('pending.reject');
+            Route::post('/pending-members/update', [MembershipController::class, 'updatePendingMembers'])->name('pending.update');
             Route::get('/{id}', [MembershipController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [MembershipController::class, 'edit'])->name('edit');
             Route::put('/{id}', [MembershipController::class, 'update'])->name('update');

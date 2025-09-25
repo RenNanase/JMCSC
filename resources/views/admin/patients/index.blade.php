@@ -99,41 +99,8 @@
                             </table>
                         </div>
 
-                        {{-- Simple Pagination --}}
-                        @if($patients->hasPages())
-                            <div class="mt-6 flex items-center justify-between">
-                                <div class="text-sm text-gray-700">
-                                    Showing {{ $patients->firstItem() ?? 0 }} to {{ $patients->lastItem() ?? 0 }} of {{ $patients->total() }} patients
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    {{-- Previous Page --}}
-                                    @if($patients->onFirstPage())
-                                        <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed text-sm">
-                                            Previous
-                                        </span>
-                                    @else
-                                        <a href="{{ $patients->previousPageUrl() }}" class="px-3 py-2 text-[#27a2a2] bg-white border border-[#27a2a2] rounded-md hover:bg-[#27a2a2] hover:text-white transition-colors text-sm">
-                                            Previous
-                                        </a>
-                                    @endif
-
-                                    <span class="px-3 py-2 text-sm text-gray-600">
-                                        Page {{ $patients->currentPage() }} of {{ $patients->lastPage() }}
-                                    </span>
-
-                                    {{-- Next Page --}}
-                                    @if($patients->hasMorePages())
-                                        <a href="{{ $patients->nextPageUrl() }}" class="px-3 py-2 text-[#27a2a2] bg-white border border-[#27a2a2] rounded-md hover:bg-[#27a2a2] hover:text-white transition-colors text-sm">
-                                            Next
-                                        </a>
-                                    @else
-                                        <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed text-sm">
-                                            Next
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
+                        <!-- Pagination -->
+                        <x-pagination :paginator="$patients" />
                     @else
                         <div class="text-center py-8">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -258,112 +258,73 @@
     <div class="cloud cloud-sm cloud-ltr small-cloud5"></div>
     <div class="cloud cloud-sm cloud-rtl small-cloud6"></div>
     <div class="cloud cloud-sm cloud-ltr small-cloud7"></div>
-    <div class="cloud cloud-sm cloud-rtl small-cloud8"></div>
-    <div class="cloud cloud-sm cloud-ltr small-cloud9"></div>
-    <div class="cloud cloud-sm cloud-rtl small-cloud10"></div>
 
-    <!-- Header -->
-    <header class="fixed top-0 w-full z-50 px-4 pt-4" x-data="{ mobileMenuOpen: false }">
-        <div class="mx-auto max-w-7xl glassmorphism rounded-xl px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 items-center justify-between">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <div class="text-2xl font-bold text-white">JMC Senior Care</div>
-                </div>
-
-                <!-- Hamburger Button (always visible) -->
-                <div class="flex items-center">
-                    <button
-                        @click="mobileMenuOpen = !mobileMenuOpen"
-                        class="inline-flex items-center justify-center p-3 rounded-full text-white hover:text-white focus:outline-none relative overflow-hidden"
-                        :class="mobileMenuOpen ? 'glassmorphism' : 'hover:glassmorphism'"
-                        aria-expanded="false"
-                    >
-                        <svg
-                            class="h-6 w-6 transition-transform duration-300"
-                            :class="{'hidden': mobileMenuOpen, 'block': !mobileMenuOpen }"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg
-                            class="h-6 w-6 transition-transform duration-300"
-                            :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen }"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile menu, show/hide based on menu state -->
-        <div
-            x-show="mobileMenuOpen"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-10"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-10"
-            class="absolute inset-x-0 top-16 z-10 glassmorphism rounded-lg mx-4 mt-2"
-        >
-            <div class="px-3 pt-3 pb-4 space-y-2 sm:px-4">
-                <!-- <a href="#" class="menu-item block px-4 py-3 rounded-md text-base font-medium text-white hover:text-white">Product</a>
-                <a href="#" class="menu-item block px-4 py-3 rounded-md text-base font-medium text-white hover:text-white">TBA</a>
-                <a href="#" class="menu-item block px-4 py-3 rounded-md text-base font-medium text-white hover:text-white">TBA</a> -->
-
-                <!-- Department submenu -->
-                <div x-data="{ open: false }" class="relative">
-                    <button
-                        @click="open = !open"
-                        class="menu-item flex justify-between w-full px-4 py-3 text-base font-medium text-white hover:text-white rounded-md"
-                    >
-                        <span>Department</span>
-                        <svg
-                            class="w-5 h-5 ml-2 transform transition-transform duration-200"
-                            x-bind:class="{ 'rotate-180': open }"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div
-                        x-show="open"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 scale-95"
-                        x-transition:enter-end="opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 scale-100"
-                        x-transition:leave-end="opacity-0 scale-95"
-                        class="submenu px-2 py-2 rounded-md mt-2 mx-2"
-                    >
-                        <a href="{{ route('retail_dept.retail_search') }}" class="menu-item block px-4 py-2 text-sm rounded-md text-white hover:text-white">
-                            Retail Department
+        <!-- Header -->
+        <header class="fixed top-0 w-full z-50 px-4 pt-4">
+            <div class="mx-auto max-w-7xl glassmorphism rounded-xl px-4 sm:px-6 lg:px-8">
+                <div class="h-16 flex items-center justify-end">
+                    <!-- Department Icons -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Retail Department -->
+                        <a href="{{ route('retail_dept.retail_search') }}" 
+                           class="group relative flex flex-col items-center p-2 rounded-lg transition-all duration-200 hover:bg-white/10"
+                           title="Retail Department">
+                            <div class="p-2 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </div>
+                            <span class="mt-1 text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">Retail</span>
                         </a>
+
+                        <!-- Marketing Department -->
                         <a href="{{ route('login') }}?redirect_to=marketing.dashboard"
-                           class="menu-item block px-4 py-2 text-sm rounded-md text-white hover:text-white">
-                            Marketing Department
+                           class="group relative flex flex-col items-center p-2 rounded-lg transition-all duration-200 hover:bg-white/10"
+                           title="Marketing Department">
+                            <div class="p-2 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <span class="mt-1 text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">Marketing</span>
                         </a>
+
+                        <!-- Admin Login -->
                         <a href="{{ route('login') }}?redirect_to=admin.dashboard"
-                           class="menu-item block px-4 py-2 text-sm rounded-md text-white hover:text-white">
-                            Admin Login
+                           class="group relative flex flex-col items-center p-2 rounded-lg transition-all duration-200 hover:bg-white/10"
+                           title="Admin Login">
+                            <div class="p-2 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <span class="mt-1 text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">Admin</span>
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    {{-- Hero Section with Typing Effect --}}
+        {{-- Hero Section with Typing Effect --}}
+        <section class="h-[calc(100vh-200px)] flex flex-col items-center justify-center text-center px-4 overflow-hidden relative z-10">
+            <div
+                x-data="{
+                    text: '',
+                    textArray: [
+                        'Welcome to JMC Senior Care',
+                        'Care is not a feature—it\'s a philosophy',
+                        'Designed to serve those who once served us'
+                    ],
+                    textIndex: 0,
+                    charIndex: 0,
+                    typeSpeed: 110,
+                    cursorSpeed: 550,
+                    pauseEnd: 1500,
+                    pauseStart: 20,
+                    direction: 'forward'
+                }"
+                x-init="(() => {
+                    let typingInterval;
     <section class="h-[calc(100vh-200px)] flex flex-col items-center justify-center text-center px-4 overflow-hidden relative z-10">
         <div
             x-data="{

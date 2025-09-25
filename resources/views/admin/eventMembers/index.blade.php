@@ -60,11 +60,11 @@
                                                 <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[#2cacad] text-white text-xs font-medium rounded hover:bg-[#249b9b] transition">Verify</button>
                                             </form>
                                             <span class="inline-block w-2"></span>
-                                            <form action="{{ route('admin.eventMembers.reject', $member['id']) }}" method="POST" class="inline">
+                                            {{-- <form action="{{ route('admin.eventMembers.reject', $member['id']) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('PUT')
                                                 <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-700 text-white text-xs font-medium rounded hover:bg-red-800 transition">Not Verify</button>
-                                            </form>
+                                            </form> --}}
                                         </td>
                                     </tr>
                                 @empty
@@ -81,54 +81,9 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-6 flex justify-between items-center">
-                        <div class="text-sm text-gray-700">
-                            Showing {{ $paginator->firstItem() ?? 0 }} to {{ $paginator->lastItem() ?? 0 }} of {{ $paginator->total() }} results
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            @if($paginator->hasPages())
-                                <!-- Previous Page -->
-                                @if($paginator->onFirstPage())
-                                    <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                    </span>
-                                @else
-                                    <a href="{{ $paginator->previousPageUrl() }}" class="px-3 py-2 text-[#2cacad] bg-white border border-[#2cacad] rounded-md hover:bg-[#2cacad] hover:text-white transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                        </svg>
-                                    </a>
-                                @endif
-
-                                <!-- Page Numbers -->
-                                <div class="flex space-x-1">
-                                    @foreach($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
-                                        @if($page == $paginator->currentPage())
-                                            <span class="px-3 py-2 bg-[#2cacad] text-white rounded-md font-medium">{{ $page }}</span>
-                                        @else
-                                            <a href="{{ $url }}" class="px-3 py-2 text-[#2cacad] bg-white border border-[#2cacad] rounded-md hover:bg-[#2cacad] hover:text-white transition-colors">{{ $page }}</a>
-                                        @endif
-                                    @endforeach
-                                </div>
-
-                                <!-- Next Page -->
-                                @if($paginator->hasMorePages())
-                                    <a href="{{ $paginator->nextPageUrl() }}" class="px-3 py-2 text-[#2cacad] bg-white border border-[#2cacad] rounded-md hover:bg-[#2cacad] hover:text-white transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </a>
-                                @else
-                                    <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </span>
-                                @endif
-                            @endif
-                        </div>
+                    <!-- Pagination -->
+                    <x-pagination :paginator="$paginator" />
+                    <div class="mt-6">
                         <a href="{{ route('admin.eventMembers.unverified') }}" class="inline-block px-4 py-2 bg-white border border-[#2cacad] text-[#2cacad] rounded hover:bg-[#2cacad] hover:text-white transition">View Unverified Members</a>
                     </div>
                 </div>

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 
 class MembershipController extends Controller
 {
@@ -42,7 +44,7 @@ class MembershipController extends Controller
      */
     public function list(Request $request)
     {
-        $query = Member::query();
+        $query = Member::query()->with('registeredBy');
 
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
@@ -61,7 +63,7 @@ class MembershipController extends Controller
      */
     public function show($id)
     {
-        $member = Member::findOrFail($id);
+        $member = Member::with('registeredBy')->findOrFail($id);
         return view('marketing.membership.show', compact('member'));
     }
 
@@ -119,11 +121,16 @@ class MembershipController extends Controller
         ]);
 
         try {
-            $member = Member::create($request->except(['terms', 'member_emergencyContactName', 'member_emergencyContactPhone', 'member_medicalConditions']));
+            // Prepare member data with the current authenticated user's ID
+            $memberData = $request->except(['terms', 'member_emergencyContactName', 'member_emergencyContactPhone', 'member_medicalConditions']);
+            $memberData['registered_by'] = Auth::id();
+            
+            $member = Member::create($memberData);
 
-            // Send email notification to IT
+            // Send email notification to IT (temporarily disabled for debugging)
             try {
-                Mail::send(new \App\Mail\NewMemberRegistered($member));
+                // Mail::send(new \App\Mail\NewMemberRegistered($member));
+                // Email notification temporarily disabled
             } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
                 return response()->view('errors.server-down');
             } catch (\Exception $e) {
@@ -233,52 +240,71 @@ class MembershipController extends Controller
 
     public function pendingList()
     {
-        // Fetch pending members from external API
-        $response = \Illuminate\Support\Facades\Http::get('https://healthform.jmc.my/healthform/public/api/sc');
-        $members = $response->json();
-
-        // Fetch all patients' Nationality_ID and MRN
-        $patients = \App\Models\Patient::pluck('MRN', 'Nationality_ID');
-        foreach ($members as &$member) {
-            $nrid = $member['nrid'] ?? null;
-            if ($nrid && $patients->has($nrid)) {
-                $member['is_patient'] = true;
-                $member['patient_mrn'] = $patients[$nrid];
-            } else {
-                $member['is_patient'] = false;
-                $member['patient_mrn'] = null;
+        try {
+            // Fetch pending members from external API with timeout
+            $response = \Illuminate\Support\Facades\Http::timeout(10)->get('https://healthform.jmc.my/healthform/public/api/sc');
+            
+            if (!$response->successful()) {
+                throw new \Exception('Failed to fetch data from the server. Status: ' . $response->status());
             }
+            
+            $members = $response->json();
 
-            // Check if user is already a member locally
-            if ($nrid) {
-                $member['is_existing_member'] = \App\Models\Member::where('member_nric', $nrid)->exists();
-            } else {
-                $member['is_existing_member'] = false;
+            // Fetch all patients' Nationality_ID and MRN
+            $patients = \App\Models\Patient::pluck('MRN', 'Nationality_ID');
+            foreach ($members as &$member) {
+                $nrid = $member['nrid'] ?? null;
+                if ($nrid && $patients->has($nrid)) {
+                    $member['is_patient'] = true;
+                    $member['patient_mrn'] = $patients[$nrid];
+                } else {
+                    $member['is_patient'] = false;
+                    $member['patient_mrn'] = null;
+                }
+
+                // Check if user is already a member locally
+                if ($nrid) {
+                    $member['is_existing_member'] = \App\Models\Member::where('member_nric', $nrid)->exists();
+                } else {
+                    $member['is_existing_member'] = false;
+                }
             }
+            unset($member);
+
+            // Sort latest first by id if available
+            usort($members, function($a, $b) {
+                return ($b['id'] ?? 0) - ($a['id'] ?? 0);
+            });
+
+            // Paginate the results
+            $perPage = 10;
+            $currentPage = request()->get('page', 1);
+            $offset = ($currentPage - 1) * $perPage;
+            $paginatedMembers = array_slice($members, $offset, $perPage);
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $paginatedMembers,
+                count($members),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
+
+            return view('marketing.membership.pending', [
+                'paginator' => $paginator,
+            ]);
+            
+        } catch (ConnectionException $e) {
+            Log::error('Connection error in pendingList: ' . $e->getMessage());
+            return response()->view('errors.500', [
+                'exception' => new \Exception('Unable to connect to the server. Please check your internet connection and try again.')
+            ], 500);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in pendingList: ' . $e->getMessage());
+            return response()->view('errors.500', [
+                'exception' => $e
+            ], 500);
         }
-        unset($member);
-
-        // Sort latest first by id if available
-        usort($members, function($a, $b) {
-            return ($b['id'] ?? 0) - ($a['id'] ?? 0);
-        });
-
-        // Paginate (10 per page)
-        $perPage = 10;
-        $currentPage = request()->get('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-        $paginatedMembers = array_slice($members, $offset, $perPage);
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $paginatedMembers,
-            count($members),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('marketing.membership.pending', [
-            'paginator' => $paginator,
-        ]);
     }
 
     /**
@@ -313,6 +339,7 @@ class MembershipController extends Controller
                     'member_address'   => $memberData['address'] ?? '',
                     'member_email'     => $memberData['email'] ?? '',
                     'member_mrn'       => $patientMRN ?: null,
+                    'registered_by'    => Auth::id(),
                 ]);
             }
         }
@@ -334,5 +361,78 @@ class MembershipController extends Controller
 
         return redirect()->route('marketing.membership.pending')
             ->with('error', 'Member marked as not verified.');
+    }
+
+    /**
+     * Update pending members' patient status by rechecking against patients table
+     */
+    public function updatePendingMembers()
+    {
+        try {
+            // Fetch pending members from external API
+            $response = \Illuminate\Support\Facades\Http::get('https://healthform.jmc.my/healthform/public/api/sc');
+            $members = $response->json();
+
+            if (!$members) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch pending members from API'
+                ], 500);
+            }
+
+            // Fetch all patients' Nationality_ID and MRN
+            $patients = \App\Models\Patient::pluck('MRN', 'Nationality_ID');
+            $updatedCount = 0;
+            $updatedMembers = [];
+
+            foreach ($members as &$member) {
+                $nrid = $member['nrid'] ?? null;
+                $previousStatus = $member['is_patient'] ?? false;
+                
+                if ($nrid && $patients->has($nrid)) {
+                    $member['is_patient'] = true;
+                    $member['patient_mrn'] = $patients[$nrid];
+                    if (!$previousStatus) {
+                        $updatedCount++;
+                        $updatedMembers[] = [
+                            'id' => $member['id'] ?? null,
+                            'name' => $member['fullname'] ?? 'Unknown',
+                            'nrid' => $nrid,
+                            'mrn' => $patients[$nrid]
+                        ];
+                    }
+                } else {
+                    $member['is_patient'] = false;
+                    $member['patient_mrn'] = null;
+                }
+
+                // Also recheck if user is already a member locally
+                if ($nrid) {
+                    $member['is_existing_member'] = \App\Models\Member::where('member_nric', $nrid)->exists();
+                } else {
+                    $member['is_existing_member'] = false;
+                }
+            }
+            unset($member);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Updated {$updatedCount} member(s) status",
+                'updated_count' => $updatedCount,
+                'updated_members' => $updatedMembers,
+                'all_members' => $members
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error updating pending members:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating member status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

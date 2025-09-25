@@ -38,19 +38,21 @@
                 <table class="min-w-full divide-y divide-[#27a2a2]/10">
                     <thead>
                         <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">SCRN</th>
                             <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Name</th>
                             <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">E-Card</th>
                             <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">NRIC</th>
                             <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Contact</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Gender</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">DOB</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Registered By</th>
                             <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-[#27a2a2] uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-[#27a2a2]/10">
                         @forelse ($members as $member)
                         <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#27a2a2]">
+                                {{ $member->scrn ?? 'N/A' }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <div class="flex items-center space-x-2">
                                     <span>{{ $member->member_name }}</span>
@@ -68,14 +70,20 @@
                                 {{ $member->member_phoneNum }}<br>
                                 <span class="text-xs">{{ $member->member_email }}</span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $member->member_gender }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $member->member_dob->format('d/m/Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                @if($member->is_active)
-                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
-                                @else
-                                    <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Inactive</span>
-                                @endif
+                                <div class="flex items-center space-x-2">
+                                    @if($member->registeredBy)
+                                        <div class="h-8 w-8 rounded-full bg-[#27a2a2] text-white flex items-center justify-center text-xs font-medium">
+                                            {{ strtoupper(substr($member->registeredBy->name, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">{{ $member->registeredBy->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $member->created_at->format('M d, Y') }}</div>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-400">Unknown</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
@@ -83,11 +91,11 @@
                                         class="ecard-toggle-btn text-xs px-2 py-1 rounded-md transition-colors"
                                         data-id="{{ $member->id }}"
                                         data-ecard-status="{{ $member->is_ecard_given ? '1' : '0' }}"
-                                        title="Toggle E-Card status">
+                                        title="Click if E-Card is given">
                                         @if($member->is_ecard_given)
                                             <span class="bg-green-100 text-green-800 px-2 py-1 rounded-md">✓ Given</span>
                                         @else
-                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-md"> Pending</span>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-md"> Pending E-Card</span>
                                         @endif
                                     </button>
                                     <a href="{{ route('marketing.membership.show', $member->id) }}" class="text-[#27a2a2] hover:text-[#27a2a2]/80">View</a>
@@ -98,7 +106,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No members found</td>
+                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No members found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -106,9 +114,7 @@
             </div>
 
             <!-- Pagination -->
-            <div class="mt-4">
-                {{ $members->links() }}
-            </div>
+            <x-pagination :paginator="$members" />
         </div>
     </div>
 </x-marketing-layout>
@@ -145,9 +151,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         this.setAttribute('data-ecard-status', '0');
                     }
 
-                    // Update the e-card indicator in the name column
+                    // Update the e-card indicator in the E-Card column
                     const row = this.closest('tr');
-                    const statusCell = row.querySelector('td:nth-child(2)');
+                    const statusCell = row.querySelector('td:nth-child(3)');
 
                     if (data.is_ecard_given) {
                         statusCell.innerHTML = '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Given</span>';

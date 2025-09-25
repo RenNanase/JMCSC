@@ -105,9 +105,8 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-4">
-                            {{ $users->links() }}
-                        </div>
+                        <!-- Pagination -->
+                        <x-pagination :paginator="$users" />
                     @else
                         <div class="text-center py-8">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

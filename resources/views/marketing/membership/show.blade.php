@@ -21,7 +21,8 @@
                         <div>
                             <h2 class="text-xl font-semibold text-[#27a2a2]">{{ $member->member_name }}</h2>
                             <p class="text-sm text-[#27a2a2]/70">
-                                Member since {{ $member->created_at->format('d M Y') }}
+                                SCRN: <span class="font-bold text-[#27a2a2]">{{ $member->scrn ?? 'Not assigned' }}</span>
+                                • Member since {{ $member->created_at->format('d M Y') }}
                                 •
                                 @if($member->is_active)
                                     <span class="text-green-600 font-medium">Active</span>
@@ -86,7 +87,40 @@
                     </div>
                 </div>
 
-                <!-- Future sections can be added here -->
+                <!-- Registration Information -->
+                <div class="mt-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-md font-medium text-[#27a2a2] mb-3">Registration Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <div class="text-gray-500 mb-1">Registered By</div>
+                                @if($member->registeredBy)
+                                    <div class="flex items-center space-x-2">
+                                        <div class="h-8 w-8 rounded-full bg-[#27a2a2] text-white flex items-center justify-center text-xs font-medium">
+                                            {{ strtoupper(substr($member->registeredBy->name, 0, 2)) }}
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ $member->registeredBy->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $member->registeredBy->role ?? 'Staff' }}</div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="text-gray-400">Unknown</div>
+                                @endif
+                            </div>
+                            <div>
+                                <div class="text-gray-500 mb-1">Registration Date</div>
+                                <div class="font-medium text-gray-900">{{ $member->created_at->format('d M Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $member->created_at->format('h:i A') }}</div>
+                            </div>
+                            <div>
+                                <div class="text-gray-500 mb-1">Last Updated</div>
+                                <div class="font-medium text-gray-900">{{ $member->updated_at->format('d M Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $member->updated_at->format('h:i A') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
